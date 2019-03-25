@@ -3,6 +3,7 @@ package com.gavrilov.rest.resources;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,6 +15,7 @@ public class FileResource {
 
     private static final String UPLOAD_FILE_SERVER = "E:/uploadTest/";
 
+    @RolesAllowed("ADMIN")
     @GET
     @Path("/download")
     @Produces(MediaType.MULTIPART_FORM_DATA)
@@ -24,6 +26,7 @@ public class FileResource {
         return responseBuilder.build();
     }
 
+    @RolesAllowed("ADMIN")
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)

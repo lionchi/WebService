@@ -1,6 +1,5 @@
 package com.gavrilov.rest.configuration.jersey;
 
-import com.gavrilov.rest.providers.AuthenticationFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -10,7 +9,7 @@ import javax.ws.rs.ApplicationPath;
 public class RestConfiguration extends ResourceConfig {
     public RestConfiguration() {
         packages(false, "com.gavrilov.rest.resources");
+        packages(false, "com.gavrilov.rest.providers");
         register(MultiPartFeature.class);
-        register(AuthenticationFilter.class);
     }
 }

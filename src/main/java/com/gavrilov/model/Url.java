@@ -1,7 +1,11 @@
 package com.gavrilov.model;
 
+import javax.validation.constraints.NotEmpty;
+
 public class Url extends BaseEntity {
+    @NotEmpty
     private String description;
+    @NotEmpty
     private String value;
 
     public Url() {

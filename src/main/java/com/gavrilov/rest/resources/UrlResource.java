@@ -3,6 +3,7 @@ package com.gavrilov.rest.resources;
 import com.gavrilov.dao.UrlDAO;
 import com.gavrilov.model.Url;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,6 +19,7 @@ public class UrlResource {
     @Inject
     private UrlDAO urlDAO;
 
+    @RolesAllowed("USER")
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -26,6 +28,7 @@ public class UrlResource {
         return Response.ok(url).build();
     }
 
+    @RolesAllowed("USER")
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)

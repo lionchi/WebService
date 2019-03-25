@@ -26,6 +26,9 @@
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+    <listener>
+        <listener-class>com.gavrilov.rest.listener.SessionListener</listener-class>
+    </listener>
     <resource-env-ref>
         <resource-env-ref-name>BeanManager</resource-env-ref-name>
         <resource-env-ref-type>javax.enterprise.inject.spi.BeanManager</resource-env-ref-type>

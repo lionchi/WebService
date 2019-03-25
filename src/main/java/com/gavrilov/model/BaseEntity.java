@@ -1,6 +1,9 @@
 package com.gavrilov.model;
 
+import javax.validation.constraints.NotNull;
+
 public abstract class BaseEntity {
+    @NotNull
     private Long id;
 
     BaseEntity() {

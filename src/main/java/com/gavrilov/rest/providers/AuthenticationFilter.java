@@ -1,10 +1,14 @@
 package com.gavrilov.rest.providers;
 
+import com.gavrilov.common.UserDetails;
+import com.gavrilov.dao.UserDAO;
+import com.gavrilov.model.User;
 import org.glassfish.jersey.internal.util.Base64;
 
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -20,40 +24,37 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
+    @Inject
+    private UserDAO userDAO;
+    @Inject
+    private UserDetails userDetails;
 
-    private static final String AUTHORIZATION_PROPERTY = "Authorization";
-    private static final String AUTHENTICATION_SCHEME = "Basic";
+    private static final String ADMIN_LOGIN = "admin";
+    private static final String USER_LOGIN = "user";
+    private static final String PASSWORD_LOGIN = "123456";
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        Method method = resourceInfo.getResourceMethod();
-        if (!method.isAnnotationPresent(PermitAll.class)) {
-            if (method.isAnnotationPresent(DenyAll.class)) {
+        Method resourceMethod = resourceInfo.getResourceMethod();
+        if (!resourceMethod.isAnnotationPresent(PermitAll.class)) {
+            if (resourceMethod.isAnnotationPresent(DenyAll.class)) {
                 requestContext.abortWith(Response.status(Response.Status.FORBIDDEN)
                         .entity("Доступ заблокирован для всех пользователей !!").build());
-                return;
-            }
-            final MultivaluedMap<String, String> headers = requestContext.getHeaders();
-            //Заголовок авторизации выборки
-            final List<String> authorization = headers.get(AUTHORIZATION_PROPERTY);
-            if (authorization == null || authorization.isEmpty()) {
-                requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("Вы не можете получить доступ к этому ресурсу ").build());
-                return;
-            }
-            //Получить закодированное имя пользователя и пароль
-            final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
-            //Расшифровать имя пользователя и пароль
-            String usernameAndPassword = new String(Base64.decode(encodedUserPassword.getBytes()));
-
-            final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
-            final String username = tokenizer.nextToken();
-            final String password = tokenizer.nextToken();
-
-            if (method.isAnnotationPresent(RolesAllowed.class)) {
-                RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
+            } else if (resourceMethod.isAnnotationPresent(RolesAllowed.class)) {
+                RolesAllowed rolesAnnotation = resourceMethod.getAnnotation(RolesAllowed.class);
                 Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
-                if (!isUserAllowed(username, password, rolesSet)) {
+                Set<String> rolesSetTheUser = new HashSet<>();
+                if (userDetails.userIsAuthorized()) {
+                    rolesSetTheUser.addAll(userDetails.getRoleNames());
+                } else {
+                    User byLoginAndPassword = userDAO.findByLoginAndPassword(ADMIN_LOGIN, PASSWORD_LOGIN);
+                    userDetails.setEnable(byLoginAndPassword.getEnable());
+                    userDetails.setLogin(byLoginAndPassword.getLogin());
+                    userDetails.setRoleNames(byLoginAndPassword.getRoleNames());
+                    rolesSetTheUser.addAll(byLoginAndPassword.getRoleNames());
+                }
+
+                if (!isUserAllowed(rolesSet, rolesSetTheUser)) {
                     requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                             .entity("Вы не можете получить доступ к этому ресурсу").build());
                 }
@@ -61,12 +62,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
-    private boolean isUserAllowed(final String username, final String password, final Set<String> rolesSet) {
+    private boolean isUserAllowed(final Set<String> rolesSetTheMethod, final Set<String> rolesSetTheUser) {
         boolean isAllowed = false;
-        if (username.equals("howtodoinjava") && password.equals("password")) {
-            String userRole = "USER";
-            if (rolesSet.contains(userRole)) {
+        for (String roleName : rolesSetTheUser) {
+            if (rolesSetTheMethod.contains(roleName)) {
                 isAllowed = true;
+                break;
             }
         }
         return isAllowed;

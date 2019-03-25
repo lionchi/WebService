@@ -27,7 +27,7 @@ public final class ConfigurationDb {
         }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(url, password, user);
+            connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             log.error("Ошибка при попытке подключиться к бд", e);
         }

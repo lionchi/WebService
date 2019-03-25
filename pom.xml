@@ -41,7 +41,7 @@
             <properties>
                 <db.url>jdbc:postgresql://localhost:5432/webservice</db.url>
                 <db.driver>org.postgresql.Driver</db.driver>
-                <db.user>root</db.user>
+                <db.user>postgres</db.user>
                 <db.password>root</db.password>
             </properties>
             <activation>

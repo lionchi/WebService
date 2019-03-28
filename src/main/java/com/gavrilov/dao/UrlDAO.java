@@ -6,6 +6,8 @@ import com.gavrilov.model.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Resource;
+import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
 import java.sql.*;
 import java.util.LinkedList;
@@ -13,6 +15,11 @@ import java.util.List;
 
 public class UrlDAO implements DAO<Url> {
     private static final Logger log = LoggerFactory.getLogger(UrlDAO.class);
+
+    //region Можно заместо ConfigurationDb и profiles в maven использовать Resource tomcat и данную аннатацию
+/*    @Resource(name = "jdbc/TestDB")
+    private DataSource dataSource;*/
+    //endregion
 
     @Override
     public Url findById(@NotNull Long id) {
